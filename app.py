@@ -77,6 +77,37 @@ app.layout = html.Div([
             )
         ]
     ),
+    html.Br(),
+    # line break
+    html.H4('Enter Duration'),
+    html.P(
+        children=[
+            "See the various Duration strings here: ",
+            html.A(
+                "Duration pairs",
+                href='https://interactivebrokers.github.io/tws-api/historical_bars.html'
+            )
+        ]
+    ),
+    html.Div(
+        ["Input Duration String: ", dcc.Input(
+            id = 'duration-input', value='30 D', type='text'
+        )]
+
+    ),
+    html.Br(),
+    html.H4('Enter a Bar Size'),
+    html.Div(
+        dcc.Dropdown(
+            ['1 secs', '5 secs', '10 secs', '15 secs', '30 secs', '1 min', '2 mins',
+             '3 mins', '5 mins', '10 mins', '15 mins', '20 mins', '30 mins',
+             '1 hour', '2 hours', '3 hours', '4 hours', '8 hours', '1 day', '1 week', '1 month'],
+            '1 day',
+            id='bar-size'
+        ),
+        style = {'width': '365px'}
+    ),
+
 
     html.H4("Enter a currency pair:"),
     html.P(
@@ -143,10 +174,12 @@ app.layout = html.Div([
     #   of 'currency-input' at the time the button was pressed DOES get passed in.
     [State('currency-input', 'value'), State('what-to-show', 'value'),
      State('edt-date', 'date'), State('edt-hour', 'value'),
-     State('edt-minute', 'value'), State('edt-second', 'value')]
+     State('edt-minute', 'value'), State('edt-second', 'value'),
+     State('duration-input','value'), State('bar-size','value')]
 )
-def update_candlestick_graph(n_clicks, currency_string, what_to_show,
-                             edt_date, edt_hour, edt_minute, edt_second):
+def update_candlestick_graph(n_clicks, currency_input, what_to_show,
+                             edt_date, edt_hour, edt_minute, edt_second,duration_input,
+                             bar_size):
     # n_clicks doesn't
     # get used, we only include it for the dependency.
 
@@ -158,10 +191,10 @@ def update_candlestick_graph(n_clicks, currency_string, what_to_show,
     # First things first -- what currency pair history do you want to fetch?
     # Define it as a contract object!
     contract = Contract()
-    contract.symbol   = currency_string.split(".")[0]
+    contract.symbol   = currency_input.split(".")[0]
     contract.secType  = 'CASH'
     contract.exchange = 'IDEALPRO' # 'IDEALPRO' is the currency exchange.
-    contract.currency = currency_string.split(".")[1]
+    contract.currency = currency_input.split(".")[1]
 
     ############################################################################
     ############################################################################
@@ -175,28 +208,28 @@ def update_candlestick_graph(n_clicks, currency_string, what_to_show,
     # Some default values are provided below to help with your testing.
     # Don't forget -- you'll need to update the signature in this callback
     #   function to include your new vars!
-    # cph = fetch_historical_data(
-    #     contract=contract,
-    #     endDateTime='',
-    #     durationStr='30 D',       # <-- make a reactive input
-    #     barSizeSetting='1 hour',  # <-- make a reactive input
-    #     whatToShow=what_to_show,
-    #     useRTH=True               # <-- make a reactive input
-    # )
+    cph = fetch_historical_data(
+         contract=contract,
+         endDateTime='',
+         durationStr= duration_input,       # <-- make a reactive input
+         barSizeSetting= bar_size,  # <-- make a reactive input
+         whatToShow=what_to_show,
+         useRTH=True               # <-- make a reactive input
+     )
     # # # Make the candlestick figure
-    # fig = go.Figure(
-    #     data=[
-    #         go.Candlestick(
-    #             x=cph['date'],
-    #             open=cph['open'],
-    #             high=cph['high'],
-    #             low=cph['low'],
-    #             close=cph['close']
-    #         )
-    #     ]
-    # )
+    fig = go.Figure(
+         data=[
+             go.Candlestick(
+                 x=cph['date'],
+                 open=cph['open'],
+                 high=cph['high'],
+                 low=cph['low'],
+                 close=cph['close']
+             )
+         ]
+     )
     # # # Give the candlestick figure a title
-    # fig.update_layout(title=('Exchange Rate: ' + currency_string))
+    fig.update_layout(title=('Exchange Rate: ' + currency_input))
     ############################################################################
     ############################################################################
 
@@ -204,27 +237,25 @@ def update_candlestick_graph(n_clicks, currency_string, what_to_show,
     ############################################################################
     # This block returns a candlestick plot of apple stock prices. You'll need
     # to delete or comment out this block and use your currency prices instead.
-    df = pd.read_csv(
-        'https://raw.githubusercontent.com/plotly/datasets/master/finance-charts-apple.csv'
-    )
-    fig = go.Figure(
-        data=[
-            go.Candlestick(
-                x=df['Date'],
-                open=df['AAPL.Open'],
-                high=df['AAPL.High'],
-                low=df['AAPL.Low'],
-                close=df['AAPL.Close']
-            )
-        ]
-    )
+   # df = pd.read_csv(
+     #   'https://raw.githubusercontent.com/plotly/datasets/master/finance-charts-apple.csv'
+   # )
+   # fig = go.Figure(
+        #data=[
+          #  go.Candlestick(
+           ###    high=df['AAPL.High'],
+            #    low=df['AAPL.Low'],
+            #    close=df['AAPL.Close']
+      #      )
+    #    ]
+    #)
 
-    currency_string = 'default Apple price data fetch'
+    #currency_string = 'default Apple price data fetch'
     ############################################################################
     ############################################################################
 
     # Return your updated text to currency-output, and the figure to candlestick-graph outputs
-    return ('Submitted query for ' + currency_string), fig
+    return ('Submitted query for ' + currency_input), fig
 
 # Callback for what to do when trade-button is pressed
 @app.callback(
