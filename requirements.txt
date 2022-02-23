@@ -3,3 +3,4 @@ dash
 ibapi
 jupyter
 kaleido
+ib_insync

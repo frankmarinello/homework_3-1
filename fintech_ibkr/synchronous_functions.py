@@ -4,6 +4,7 @@ from ibapi.client import EClient
 from ibapi.wrapper import EWrapper
 import threading
 import time
+from ib_insync import *
 
 # If you want different default values, configure it here.
 default_hostname = '127.0.0.1'
@@ -53,7 +54,7 @@ class ibkr_app(EWrapper, EClient):
         # Take a look at candlestick_plot.ipynb for some help!
         # assign the dataframe to self.historical_data.
         # print(reqId, bar)
-        self.historical_data = bar
+        self.historical_data = util.df(bar)
 
     def historicalDataEnd(self, reqId: int, start: str, end: str):
         # super().historicalDataEnd(reqId, start, end)
