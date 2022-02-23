@@ -107,7 +107,20 @@ app.layout = html.Div([
         ),
         style = {'width': '365px'}
     ),
+    html.Br(),
+    html.H4('Regular Trading Hours Data Only'),
+    html.Div(
+        dcc.RadioItems(
+         id='rth-indicator',
+            options=[
+            {'label': 'True', 'value': True},
+            {'label': 'False', 'value': False}
+        ],
+        value=True
+        ),
+        style = {'width': '365px'}
 
+    ),
 
     html.H4("Enter a currency pair:"),
     html.P(
@@ -175,11 +188,12 @@ app.layout = html.Div([
     [State('currency-input', 'value'), State('what-to-show', 'value'),
      State('edt-date', 'date'), State('edt-hour', 'value'),
      State('edt-minute', 'value'), State('edt-second', 'value'),
-     State('duration-input','value'), State('bar-size','value')]
+     State('duration-input','value'), State('bar-size','value'),
+     State('rth-indicator','value')]
 )
 def update_candlestick_graph(n_clicks, currency_input, what_to_show,
                              edt_date, edt_hour, edt_minute, edt_second,duration_input,
-                             bar_size):
+                             bar_size,rth_indicator):
     # n_clicks doesn't
     # get used, we only include it for the dependency.
 
@@ -214,7 +228,7 @@ def update_candlestick_graph(n_clicks, currency_input, what_to_show,
          durationStr= duration_input,       # <-- make a reactive input
          barSizeSetting= bar_size,  # <-- make a reactive input
          whatToShow=what_to_show,
-         useRTH=True               # <-- make a reactive input
+         useRTH=rth_indicator              # <-- make a reactive input
      )
     # # # Make the candlestick figure
     fig = go.Figure(
