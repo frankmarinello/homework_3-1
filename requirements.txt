@@ -4,3 +4,5 @@ ibapi
 jupyter
 kaleido
 ib_insync
+waitress
+
